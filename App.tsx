@@ -34,6 +34,8 @@ const App: React.FC = () => {
   const [premiumStaffPrice, setPremiumStaffPrice] = useState(30.00);
   const [adminPixKey, setAdminPixKey] = useState('79999055301');
   const [adminPhone, setAdminPhone] = useState('5579999055301');
+  const [dojoId, setDojoId] = useState<string>('');
+  const [benId, setBenId] = useState<string>('');
   const [payments, setPayments] = useState<Payment[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -51,6 +53,8 @@ const App: React.FC = () => {
         setPosts(parsed.posts || []);
         setAcademyLogo(parsed.academyLogo || null);
         setSubscription(parsed.subscription || INITIAL_SUBSCRIPTION);
+        setDojoId(parsed.dojoId || '');
+        setBenId(parsed.benId || '');
         if (parsed.adminPhone) setAdminPhone(parsed.adminPhone);
         if (parsed.products) setProducts(parsed.products);
       } catch (e) {
@@ -59,14 +63,14 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Salvar dados localmente e preparar para nuvem
+  // Salvar dados localmente
   useEffect(() => {
     const dataToSave = { 
       students, instructors, tasks, payments, posts, academyLogo, 
-      subscription, products, premiumStaffPrice, adminPixKey, adminPhone 
+      subscription, products, premiumStaffPrice, adminPixKey, adminPhone, dojoId, benId
     };
     localStorage.setItem('gestao_bjj_elite_v3', JSON.stringify(dataToSave));
-  }, [students, instructors, tasks, payments, posts, academyLogo, subscription, products, premiumStaffPrice, adminPixKey, adminPhone]);
+  }, [students, instructors, tasks, payments, posts, academyLogo, subscription, products, premiumStaffPrice, adminPixKey, adminPhone, dojoId, benId]);
 
   const addStudent = (s: Student) => setStudents(prev => [...prev, s]);
   const updateStudent = (id: string, updated: Partial<Student>) => 
@@ -108,7 +112,6 @@ const App: React.FC = () => {
     <Router>
       <div className="flex flex-col md:flex-row min-h-screen bg-[#020617] relative">
         
-        {/* FAB Sensei Ben */}
         {currentUser.role !== 'Aluno' && (
           <Link 
             to="/assistant" 
@@ -166,9 +169,9 @@ const App: React.FC = () => {
                 user={currentUser} academyLogo={academyLogo} onLogoChange={setAcademyLogo}
                 subscription={subscription} premiumStaffPrice={premiumStaffPrice} onUpdatePremiumPrice={setPremiumStaffPrice}
                 adminPixKey={adminPixKey} onUpdateAdminPix={setAdminPixKey} adminPhone={adminPhone} onUpdateAdminPhone={setAdminPhone}
-                onUpgrade={() => {}} onLogout={handleLogout}
+                onUpgrade={() => {}} onLogout={handleLogout} benId={benId}
               />} />
-              <Route path="/assistant" element={<AiAssistant students={students} payments={payments} tasks={tasks} user={currentUser} />} />
+              <Route path="/assistant" element={<AiAssistant students={students} payments={payments} tasks={tasks} user={currentUser} benId={benId} />} />
               <Route path="/tasks" element={<TaskList tasks={tasks} onAdd={addTask} onUpdate={updateTask} onDelete={deleteTask} />} />
               <Route path="/instructors" element={<InstructorList instructors={instructors} onUpdate={updateInstructor} onDelete={deleteInstructor} premiumStaffPrice={premiumStaffPrice} onUpdatePrice={setPremiumStaffPrice} user={currentUser} />} />
               <Route path="/instructors/new" element={<InstructorForm onSubmit={addInstructor} />} />
@@ -180,7 +183,7 @@ const App: React.FC = () => {
               <Route path="/store" element={<Store products={products} instructors={instructors} user={currentUser} onAddProduct={addProduct} onUpdateProduct={updateProduct} onDeleteProduct={deleteProduct} adminPixKey={adminPixKey} adminPhone={adminPhone} />} />
               <Route path="/finance" element={<Payments payments={payments} students={students} instructors={instructors} user={currentUser} adminPixKey={adminPixKey} onUpdateAdminPix={setAdminPixKey} premiumStaffPrice={premiumStaffPrice} onUpdatePremiumPrice={setPremiumStaffPrice} onAddPayment={addPayment} onUpdatePayment={updatePayment} onDeletePayment={deletePayment} />} />
               <Route path="/community" element={<Community posts={posts} user={currentUser} onPost={addPost} />} />
-              <Route path="/help" element={<Help />} />
+              <Route path="/help" element={<Help dojoId={dojoId} onUpdateDojoId={setDojoId} benId={benId} onUpdateBenId={setBenId} />} />
             </Routes>
           </div>
         </main>
